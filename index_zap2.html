@@ -41,8 +41,8 @@
        * Zappar
        */
       const initGLTFForZappar = async () => {
+        console.log("initGLTFForZappar");
         const { model, animations, mixer } = await loadGLTF(targetModel);
-        console.log("load");
         // モデルをセット
         if (model) {
           model.position.set(0, -1, 0);
@@ -77,79 +77,8 @@
         tick();
       };
 
-      const initGLTF = () => {
-        const inputElement = document.getElementById("upload");
-        inputElement.addEventListener(
-          "change",
-          async (evt) => {
-            if (evt.target.files.length) {
-              const url = URL.createObjectURL(evt.target.files[0]);
-              const { model, animations, scene_camera, mixer } = await loadGLTF(url);
-
-              console.log("load", scene_camera, animations);
-              // モデルをセット
-              if (model) {
-                model.position.set(0, -1, 0);
-                scene.add(model);
-              }
-
-              //Camera
-              //zapparじゃない場合はカメラを設定
-              if (!isZappar) {
-                if (!scene_camera) {
-                  camera = new THREE.PerspectiveCamera(
-                    70,
-                    window.innerWidth / window.innerHeight,
-                    0.1,
-                    500
-                  );
-                  camera.position.set(1, 1, 1);
-                  camera.lookAt(new THREE.Vector3(0, 0, 0));
-                  // Orbit
-                  controls = new THREE.OrbitControls(camera, renderer.domElement);
-                  controls.enableDamping = orbitConfig.enableDamping;
-                  controls.dampingFactor = orbitConfig.dampingFactor;
-                  controls.enableZoom = orbitConfig.enableZoom;
-                } else {
-                  camera = scene_camera;
-                  camera.aspect = window.innerWidth / window.innerHeight;
-                  camera.updateProjectionMatrix();
-                }
-              }
-
-              //アニメーションセット
-              if (mixer) {
-                for (let i = 0; i < animations.length; i++) {
-                  let action = mixer.clipAction(animations[i]);
-                  action.setLoop(THREE.LoopOnce);
-                  action.clampWhenFinished = true;
-                  action.play();
-                }
-              }
-
-              const tick = () => {
-                requestAnimationFrame(tick);
-
-                if (isZappar) {
-                  camera.updateFrame(renderer);
-                  renderer.render(scene, camera);
-                } else {
-                  controls.update();
-                  renderer.render(scene, camera);
-                }
-                if (mixer) {
-                  mixer.update(clock.getDelta());
-                }
-              };
-
-              tick();
-            }
-          },
-          false
-        );
-      };
-
       function loadGLTF(url) {
+        console.log("loadGLTF");
         return new Promise((resolve) => {
           const gltfLoader = new THREE.GLTFLoader();
           gltfLoader.load(
@@ -168,12 +97,6 @@
                 animations = gltf.animations;
               }
 
-              //カメラあればロード
-              if (gltf.cameras[0]) {
-                // カメラ一つを想定
-                scene_camera = gltf.cameras[0];
-              }
-
               //複数ある場合はミキサー
               if (animations && animations.length) {
                 mixer = new THREE.AnimationMixer(gltf.scene);
@@ -190,19 +113,7 @@
       }
 
       const initScene = () => {
-
-        if (!isZappar) {
-          scene = new THREE.Scene();
-          scene.background = new THREE.Color(0x404040);
-          const light = new THREE.AmbientLight(0xffffff, 2.0);
-          scene.add(light);
-          renderer = new THREE.WebGLRenderer();
-          renderer.gammaOutput = true;
-          renderer.setSize(window.innerWidth, window.innerHeight);
-          document.body.appendChild(renderer.domElement);
-          initGLTF();
-          return;
-        }
+        console.log("initScene");
 
         // Set up three.js in the usual way
         scene = new THREE.Scene();
@@ -231,7 +142,10 @@
         initGLTFForZappar();
       };
 
-      initScene();
+      window.addEventListener("load", ()=>{
+        console.log("window load");
+        initScene();
+      })
     </script>
   </body>
 </html>
